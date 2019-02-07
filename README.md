@@ -3,7 +3,7 @@ The iOS application has been created using swift programming language and Xcode 
 The Objective of the Application is to find the location of the queried places and also to find the queried places nearby.
 The App further also provides the phone number(If Any) and Website of the queried places upon clicking.
 
-The Task Distribution by each member ias as follows.
+The Task Distribution by each member is as follows.
 1. Bhavya Ahuja(A00428499) - Sorting the result places based on Name
                            - Sorting the result places based on Rating
                            - default sort on result table view
