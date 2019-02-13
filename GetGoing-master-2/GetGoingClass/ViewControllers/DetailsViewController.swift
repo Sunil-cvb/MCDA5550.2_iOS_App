@@ -11,7 +11,6 @@ import UIKit
 class DetailsViewController: UIViewController {
    
     var place: PlaceDetails!
-    var resultData = NSDictionary()
     
     @IBOutlet weak var phoneLabel: UILabel!
     @IBOutlet weak var websiteLabel: UILabel!
@@ -20,7 +19,7 @@ class DetailsViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         showActivityIndicator()
-        requestPlaceInfo()
+        self.getRequestDetails()
         hideActivityIndicator()
         // Do any additional setup after loading the view.
     }
@@ -35,57 +34,46 @@ class DetailsViewController: UIViewController {
         activityIndicator.stopAnimating()
     }
     
-    func requestPlaceInfo() {
-        var urlComponents = URLComponents()
-        urlComponents.scheme = Constants.scheme
-        urlComponents.host = Constants.host
-        urlComponents.path = Constants.placeInfo
-        urlComponents.queryItems = [
-            URLQueryItem(name: "key", value: Constants.apiKey),
-            URLQueryItem(name: "placeid", value: "\(place.place_id!)")
-        ]
-        
-        if let url = urlComponents.url {
-            NetworkingLayer.getRequest(with: url, timeoutInterval: 1000) { (status, data) in
-                if let responseData = data,
-                    let jsonResponse = try? JSONSerialization.jsonObject(with: responseData, options: .allowFragments) as? [String: Any] {
-                    print("printing jsonResponse DATA")
-                       guard let self.resultData = jsonResponse!["result"] as! NSDictionary else{
-                        DispatchQueue.main.async {
-                            self.phoneLabel.text = "no phone number found"
-                            self.websiteLabel.text = "no website details found"
-                        }
-                          return
-                       }
-                        self.presentLocationInfo()
-                }
+    func getRequestDetails(){
+        GooglePlacesAPI.requestPlaceInfo(place) { (status, json) in
+            print(json ?? "")
+            DispatchQueue.main.async {
+                self.hideActivityIndicator()
             }
+
+            guard let result = json!["result"] as! NSDictionary? else { return }
+            
+            self.presentLocationInfo(json: result as NSDictionary)
+            
         }
     }
-}
     
-    func presentLocationInfo(){
-        print(self.resultData)
+    func presentErrorAlert(title: String = "Error", message: String?) {
+        let alert = UIAlertController(title: title,
+                                      message: message,
+                                      preferredStyle: .alert)
+        let okButtonAction = UIAlertAction(title: "Ok",
+                                           style: .default,
+                                           handler: nil)
+        alert.addAction(okButtonAction)
+        present(alert, animated: true)
+    }
+    
+    func presentLocationInfo(json: NSDictionary) {
+        
         DispatchQueue.main.async {
             
-            if self.resultData["formatted_phone_number"] == nil{
-            self.phoneLabel.text = "No Phone Number Registered."
-            }
-            else
-            {
-                self.phoneLabel.text = self.resultData["formatted_phone_number"]! as? String
-            }
-            if self.resultData["website"] == nil{
-                self.websiteLabel.text = "No Website found."
-            }
-            else
-            {
-                self.websiteLabel.text = self.resultData["website"]! as? String
-            }
+            guard let phoneNumber = json["formatted_phone_number"] as! String? else {
+                self.phoneLabel.text = "No Phone Number Registered."
+                return}
+                self.phoneLabel.text = phoneNumber
             
+            guard let website = json["website"] as! String? else {
+                self.websiteLabel.text = "No Website Registered."
+                return}
+            self.websiteLabel.text = website
         }
     }
-    
 
     /*
     // MARK: - Navigation
