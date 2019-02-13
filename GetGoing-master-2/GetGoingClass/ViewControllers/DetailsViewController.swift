@@ -50,15 +50,14 @@ class DetailsViewController: UIViewController {
                 if let responseData = data,
                     let jsonResponse = try? JSONSerialization.jsonObject(with: responseData, options: .allowFragments) as? [String: Any] {
                     print("printing jsonResponse DATA")
-                    if jsonResponse!["error_message"] != nil {
+                       guard let self.resultData = jsonResponse!["result"] as! NSDictionary else{
                         DispatchQueue.main.async {
                             self.phoneLabel.text = "no phone number found"
                             self.websiteLabel.text = "no website details found"
                         }
-                    }
-                    else{
-                    self.resultData = jsonResponse!["result"] as! NSDictionary
-                    self.presentLocationInfo()
+                          return
+                       }
+                        self.presentLocationInfo()
                 }
             }
         }
@@ -77,7 +76,7 @@ class DetailsViewController: UIViewController {
                 self.phoneLabel.text = self.resultData["formatted_phone_number"]! as? String
             }
             if self.resultData["website"] == nil{
-                self.phoneLabel.text = "No Website found."
+                self.websiteLabel.text = "No Website found."
             }
             else
             {
