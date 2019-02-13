@@ -63,16 +63,25 @@ class DetailsViewController: UIViewController {
         
         DispatchQueue.main.async {
             
-            guard let phoneNumber = json["formatted_phone_number"] as! String? else {
-                self.phoneLabel.text = "No Phone Number Registered."
-                return}
-                self.phoneLabel.text = phoneNumber
+            self.setPhoneNumber(json: json)
+            self.setWebsite(json: json)
             
-            guard let website = json["website"] as! String? else {
-                self.websiteLabel.text = "No Website Registered."
-                return}
-            self.websiteLabel.text = website
         }
+    }
+    
+    func setPhoneNumber(json: NSDictionary){
+        guard let phoneNumber = json["formatted_phone_number"] as! String? else {
+            self.phoneLabel.text = "No Phone Number Registered."
+            
+            return}
+        self.phoneLabel.text = phoneNumber
+    }
+    
+    func setWebsite(json: NSDictionary){
+        guard let website = json["website"] as! String? else {
+            self.websiteLabel.text = "No Website Registered."
+            return}
+        self.websiteLabel.text = website
     }
 
     /*
