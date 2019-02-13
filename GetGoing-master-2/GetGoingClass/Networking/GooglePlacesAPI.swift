@@ -62,4 +62,28 @@ class GooglePlacesAPI {
             }
         }
     }
+    
+    class func requestPlaceInfo(_ query: PlaceDetails, completion: @escaping(_ status: Int, _ json: [String: Any]?) -> Void) {
+        var urlComponents = URLComponents()
+        urlComponents.scheme = Constants.scheme
+        urlComponents.host = Constants.host
+        urlComponents.path = Constants.placeInfo
+        urlComponents.queryItems = [
+            URLQueryItem(name: "key", value: Constants.apiKey),
+            URLQueryItem(name: "placeid", value: "\(query.place_id!)")
+        ]
+        
+        if let url = urlComponents.url {
+            NetworkingLayer.getRequest(with: url, timeoutInterval: 1000) { (status, data) in
+                if let responseData = data,
+                    let jsonResponse = try? JSONSerialization.jsonObject(with: responseData, options: .allowFragments) as? [String: Any] {
+                    completion(status, jsonResponse)
+                }else{
+                    completion(status, nil)
+                    
+                }
+            }
+        }
+    }
+    
 }
